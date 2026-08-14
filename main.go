@@ -4,12 +4,12 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-
-	"github.com/dapoulsen/pokedexcli/repl"
 )
 
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
+
+	cfg := config{commands: getCommands()}
 
 	for {
 		fmt.Print("Pokedex > ")
@@ -20,18 +20,18 @@ func main() {
 		}
 
 		words := scanner.Text()
-		cleanedWords := repl.CleanInput(words)
+		cleanedWords := CleanInput(words)
 		if len(cleanedWords) == 0 {
 			continue
 		}
 
-		cmd, ok := repl.SupportedCommands[cleanedWords[0]]
-		if !ok || cmd.Callback == nil {
+		cmd, ok := cfg.commands[cleanedWords[0]]
+		if !ok || cmd.callback == nil {
 			fmt.Println("Unknown command")
 			continue
 		}
 
-		if err := cmd.Callback(); err != nil {
+		if err := cmd.callback(&cfg); err != nil {
 			fmt.Println("Error executing command:", err)
 		}
 	}
