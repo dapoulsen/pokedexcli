@@ -36,6 +36,11 @@ func getCommands() map[string]cliCommand {
 			description: "Displays the next 20 locations",
 			callback:    commandMap,
 		},
+		"mapb": {
+			name:        "mapb",
+			description: "Displays the previous 20 locations",
+			callback:    commandMapBack,
+		},
 	}
 }
 
@@ -61,6 +66,25 @@ func commandMap(cfg *config) error {
 	cfg.prevUrl = locationData.Previous
 
 	// Fetch the first 20 locations from the PokeAPI
+	locations := locationData.Results
+	for _, location := range locations {
+		fmt.Println(location.Name)
+	}
+	return nil
+}
+
+func commandMapBack(cfg *config) error {
+	if cfg.prevUrl == nil {
+		fmt.Println("you're on the first page")
+		return nil
+	}
+
+	locationData := pokeapi.GetLocationData(cfg.prevUrl)
+	// Store Next and Previous URLs for pagination
+	cfg.nextUrl = locationData.Next
+	cfg.prevUrl = locationData.Previous
+
+	// Fetch the previous 20 locations from the PokeAPI
 	locations := locationData.Results
 	for _, location := range locations {
 		fmt.Println(location.Name)
