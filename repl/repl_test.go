@@ -19,7 +19,7 @@ func TestCleanInput(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			got := cleanInput(tc.input)
+			got := CleanInput(tc.input)
 			diff := cmp.Diff(tc.expected, got)
 			if diff != "" {
 				t.Fatalf("%s", diff)
