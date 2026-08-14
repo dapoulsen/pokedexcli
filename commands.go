@@ -3,10 +3,14 @@ package main
 import (
 	"fmt"
 	"os"
+
+	"github.com/dapoulsen/pokedexcli/pokeapi"
 )
 
 type config struct {
 	commands map[string]cliCommand
+	nextUrl  *string
+	prevUrl  *string
 }
 
 type cliCommand struct {
@@ -27,6 +31,11 @@ func getCommands() map[string]cliCommand {
 			description: "Displays a help message",
 			callback:    commandHelp,
 		},
+		"map": {
+			name:        "map",
+			description: "Displays the next 20 locations",
+			callback:    commandMap,
+		},
 	}
 }
 
@@ -41,6 +50,20 @@ func commandHelp(cfg *config) error {
 	fmt.Print("Usage:\n\n")
 	for _, cmd := range cfg.commands {
 		fmt.Printf("%s: %s\n", cmd.name, cmd.description)
+	}
+	return nil
+}
+
+func commandMap(cfg *config) error {
+	locationData := pokeapi.GetLocationData(cfg.nextUrl)
+	// Store Next and Previous URLs for pagination
+	cfg.nextUrl = locationData.Next
+	cfg.prevUrl = locationData.Previous
+
+	// Fetch the first 20 locations from the PokeAPI
+	locations := locationData.Results
+	for _, location := range locations {
+		fmt.Println(location.Name)
 	}
 	return nil
 }
