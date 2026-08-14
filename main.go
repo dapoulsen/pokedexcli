@@ -18,8 +18,21 @@ func main() {
 			fmt.Println("Error reading input:", err)
 			continue
 		}
-		word := scanner.Text()
-		cleanedWord := repl.CleanInput(word)
-		fmt.Printf("Your command was: %s\n", cleanedWord[0])
+
+		words := scanner.Text()
+		cleanedWords := repl.CleanInput(words)
+		if len(cleanedWords) == 0 {
+			continue
+		}
+
+		cmd, ok := repl.SupportedCommands[cleanedWords[0]]
+		if !ok || cmd.Callback == nil {
+			fmt.Println("Unknown command")
+			continue
+		}
+
+		if err := cmd.Callback(); err != nil {
+			fmt.Println("Error executing command:", err)
+		}
 	}
 }
