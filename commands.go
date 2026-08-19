@@ -4,45 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/dapoulsen/pokedexcli/pokeapi"
+	"github.com/dapoulsen/pokedexcli/internal/pokeapi"
 )
-
-type config struct {
-	commands map[string]cliCommand
-	nextUrl  *string
-	prevUrl  *string
-}
-
-type cliCommand struct {
-	name        string
-	description string
-	callback    func(*config) error
-}
-
-func getCommands() map[string]cliCommand {
-	return map[string]cliCommand{
-		"exit": {
-			name:        "exit",
-			description: "Exit the Pokedex",
-			callback:    commandExit,
-		},
-		"help": {
-			name:        "help",
-			description: "Displays a help message",
-			callback:    commandHelp,
-		},
-		"map": {
-			name:        "map",
-			description: "Displays the next 20 locations",
-			callback:    commandMap,
-		},
-		"mapb": {
-			name:        "mapb",
-			description: "Displays the previous 20 locations",
-			callback:    commandMapBack,
-		},
-	}
-}
 
 func commandExit(cfg *config) error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
@@ -60,7 +23,10 @@ func commandHelp(cfg *config) error {
 }
 
 func commandMap(cfg *config) error {
-	locationData := pokeapi.GetLocationData(cfg.nextUrl)
+	locationData, err := pokeapi.GetLocationData(cfg.nextUrl)
+	if err != nil {
+		return err
+	}
 	// Store Next and Previous URLs for pagination
 	cfg.nextUrl = locationData.Next
 	cfg.prevUrl = locationData.Previous
@@ -79,7 +45,10 @@ func commandMapBack(cfg *config) error {
 		return nil
 	}
 
-	locationData := pokeapi.GetLocationData(cfg.prevUrl)
+	locationData, err := pokeapi.GetLocationData(cfg.prevUrl)
+	if err != nil {
+		return err
+	}
 	// Store Next and Previous URLs for pagination
 	cfg.nextUrl = locationData.Next
 	cfg.prevUrl = locationData.Previous
