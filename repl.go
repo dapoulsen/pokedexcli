@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/dapoulsen/pokedexcli/internal/pokecache"
 )
 
 func CleanInput(text string) []string {
@@ -18,6 +20,7 @@ type config struct {
 	commands map[string]cliCommand
 	nextUrl  *string
 	prevUrl  *string
+	cache    *pokecache.Cache
 }
 
 func startRepl(cfg *config) {

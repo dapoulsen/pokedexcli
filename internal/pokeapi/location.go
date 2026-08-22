@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+
+	"github.com/dapoulsen/pokedexcli/internal/pokecache"
 )
 
 type Location struct {
@@ -17,11 +19,24 @@ type Location struct {
 	} `json:"results"`
 }
 
-func GetLocationData(pageUrl *string) (Location, error) {
+const baseURL = "https://pokeapi.co/api/v2/"
+
+func GetLocationData(pageUrl *string, cache *pokecache.Cache) (Location, error) {
 	if pageUrl == nil {
-		defaultUrl := "https://pokeapi.co/api/v2/location-area/"
+		defaultUrl := baseURL + "location-area/"
 		pageUrl = &defaultUrl
 	}
+
+	e, ok := cache.Get(*pageUrl)
+	if ok {
+		var locationData Location
+		err := json.Unmarshal(e, &locationData)
+		if err != nil {
+			return Location{}, err
+		}
+		return locationData, nil
+	}
+
 	res, err := http.Get(*pageUrl)
 	if err != nil {
 		return Location{}, err
@@ -41,6 +56,8 @@ func GetLocationData(pageUrl *string) (Location, error) {
 	if err != nil {
 		return Location{}, err
 	}
+
+	cache.Add(*pageUrl, body)
 
 	return locationData, nil
 }
